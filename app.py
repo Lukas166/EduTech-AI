@@ -15,7 +15,7 @@ COURSES_PER_PAGE_DASHBOARD = 3
 
 # --- Helper Functions for Data Loading and Parsing ---
 def parse_course_content(content_text):
-    """Parses the raw content string into a structured dictionary."""
+    """Parses the raw content string into a structured dictionary with improved code extraction."""
     parsed = {
         "overview": [],
         "key_concepts": [],
@@ -24,45 +24,66 @@ def parse_course_content(content_text):
     }
     
     # Split content into logical blocks (paragraphs or sections)
-    # Using a more robust split that handles multiple newlines and retains some structure
     blocks = re.split(r'\n\s*\n+', content_text.strip())
     
-    current_section = "overview" # Default section
+    current_section = "overview"  # Default section
 
     for block in blocks:
         block_lower = block.lower()
         
         if block_lower.startswith("key concepts:"):
             current_section = "key_concepts"
-            # Remove the header from the block content
-            concept_list_str = block[len("key concepts:"):].strip()
+            concept_list_str = block[len("Key Concepts:"):].strip()
             if concept_list_str:
-                # Assuming concepts are listed with '-' or '* ' or just newlines
-                parsed["key_concepts"] = [c.strip() for c in re.split(r'\n\s*[-*]?\s*', concept_list_str) if c.strip()]
+                # Handle both bulleted and plain text concepts
+                parsed["key_concepts"] = [
+                    re.sub(r'^[-\*]\s*', '', c.strip()) 
+                    for c in re.split(r'\n', concept_list_str) 
+                    if c.strip()
+                ]
+                
         elif block_lower.startswith("code example:"):
             current_section = "code_example"
-            # Extract language and code block
-            match_lang_code = re.search(r"code example:\s*(\w+):\s*\n```\w*\n([\s\S]*?)\n```", block, re.IGNORECASE | re.DOTALL)
+            # Enhanced regex pattern to handle code blocks more reliably
+            match_lang_code = re.search(
+                r"Code Example:\s*(\w+):\s*\n```(?:python)?\n([\s\S]*?)```",
+                block,
+                re.IGNORECASE
+            )
             if match_lang_code:
                 parsed["code_example"]["language"] = match_lang_code.group(1).strip().lower()
                 parsed["code_example"]["code"] = match_lang_code.group(2).strip()
-            else: # Fallback if regex fails, add as overview
-                 parsed["overview"].append(block)
+            else:
+                # Fallback: Try to extract just the code block if standard format fails
+                code_match = re.search(r'```(?:python)?\n([\s\S]*?)```', block)
+                if code_match:
+                    parsed["code_example"]["code"] = code_match.group(1).strip()
+                    parsed["code_example"]["language"] = "python"  # Default to python
+                else:
+                    parsed["overview"].append(block)
+                    
         elif block_lower.startswith("applications:"):
             current_section = "applications"
-            app_list_str = block[len("applications:"):].strip()
-            if app_list_str:
-                 parsed["applications"] = [a.strip() for a in re.split(r'\n\s*[-*]?\s*', app_list_str) if a.strip()]
+            app_text = block[len("Applications:"):].strip()
+            if app_text:
+                # Handle both bulleted and plain text applications
+                parsed["applications"] = [
+                    re.sub(r'^[-\*]\s*', '', a.strip())
+                    for a in re.split(r'\n', app_text)
+                    if a.strip()
+                ]
         else:
-            # If it's not a special section header, add to current or default to overview
-            if current_section == "overview":
-                 parsed["overview"].append(block.strip())
-            # If it's part of a section already being processed (e.g. more concepts/apps without new header)
-            # This part might need more sophisticated logic if sections are interleaved without headers.
-            # For now, unheadered blocks go to overview unless a section was just started.
-
-    # Join overview paragraphs
-    parsed["overview"] = "\n\n".join(parsed["overview"])
+            if current_section in parsed:
+                if isinstance(parsed[current_section], list):
+                    parsed[current_section].append(block.strip())
+                else:
+                    # For code_example which is a dict
+                    parsed["overview"].append(block.strip())
+            else:
+                parsed["overview"].append(block.strip())
+    
+    # Join overview paragraphs for cleaner output
+    parsed["overview"] = "\n\n".join(parsed["overview"]) if parsed["overview"] else ""
     
     return parsed
 
