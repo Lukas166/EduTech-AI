@@ -15,57 +15,48 @@ COURSES_PER_PAGE_DASHBOARD = 3
 
 # --- Helper Functions for Data Loading and Parsing ---
 def parse_course_content(content_text):
-    """Parses the raw content string into a structured dictionary."""
     parsed = {
         "overview": [],
         "key_concepts": [],
-        "code_example": {"language": "python", "code": ""},
+        "code_example": {"language": None, "code": ""},
         "applications": []
     }
-    
-    # Split content into logical blocks (paragraphs or sections)
-    # Using a more robust split that handles multiple newlines and retains some structure
-    blocks = re.split(r'\n\s*\n+', content_text.strip())
-    
-    current_section = "overview" # Default section
 
-    for block in blocks:
-        block_lower = block.lower()
-        
-        if block_lower.startswith("key concepts:"):
-            current_section = "key_concepts"
-            # Remove the header from the block content
-            concept_list_str = block[len("key concepts:"):].strip()
-            if concept_list_str:
-                # Assuming concepts are listed with '-' or '* ' or just newlines
-                parsed["key_concepts"] = [c.strip() for c in re.split(r'\n\s*[-*]?\s*', concept_list_str) if c.strip()]
-        elif block_lower.startswith("code example:"):
-            current_section = "code_example"
-            # Extract language and code block
-            match_lang_code = re.search(r"code example:\s*(\w+):\s*\n```\w*\n([\s\S]*?)\n```", block, re.IGNORECASE | re.DOTALL)
-            if match_lang_code:
-                parsed["code_example"]["language"] = match_lang_code.group(1).strip().lower()
-                parsed["code_example"]["code"] = match_lang_code.group(2).strip()
-            else: # Fallback if regex fails, add as overview
-                 parsed["overview"].append(block)
-        elif block_lower.startswith("applications:"):
-            current_section = "applications"
-            app_list_str = block[len("applications:"):].strip()
-            if app_list_str:
-                 parsed["applications"] = [a.strip() for a in re.split(r'\n\s*[-*]?\s*', app_list_str) if a.strip()]
-        else:
-            # If it's not a special section header, add to current or default to overview
-            if current_section == "overview":
-                 parsed["overview"].append(block.strip())
-            # If it's part of a section already being processed (e.g. more concepts/apps without new header)
-            # This part might need more sophisticated logic if sections are interleaved without headers.
-            # For now, unheadered blocks go to overview unless a section was just started.
+    # Extract each section using regex
+    overview_match = re.split(r'\n\s*Key Concepts:\s*', content_text, flags=re.IGNORECASE)
+    if len(overview_match) > 1:
+        parsed["overview"] = overview_match[0].strip()
+        rest = overview_match[1]
+    else:
+        parsed["overview"] = content_text.strip()
+        return parsed  # return early, no other sections found
 
-    # Join overview paragraphs
-    parsed["overview"] = "\n\n".join(parsed["overview"])
-    
+    # Extract Key Concepts
+    code_match = re.split(r'\n\s*Code Example:\s*', rest, flags=re.IGNORECASE)
+    if len(code_match) > 1:
+        key_concepts_block = code_match[0]
+        parsed["key_concepts"] = [c.strip() for c in key_concepts_block.strip().splitlines() if c.strip()]
+        rest = code_match[1]
+    else:
+        parsed["key_concepts"] = [c.strip() for c in rest.strip().splitlines() if c.strip()]
+        return parsed
+
+    # Extract Code Example
+    app_match = re.split(r'\n\s*Applications:\s*', rest, flags=re.IGNORECASE)
+    if len(app_match) > 1:
+        code_block = app_match[0]
+        parsed["applications"] = [a.strip() for a in app_match[1].strip().splitlines() if a.strip()]
+    else:
+        code_block = rest.strip()
+
+    # Extract language and code
+    lang_match = re.match(r'(\w+):\s*```[\w]*\n([\s\S]*?)```', code_block.strip(), flags=re.IGNORECASE)
+    if lang_match:
+        parsed["code_example"]["language"] = lang_match.group(1).strip().lower()
+        parsed["code_example"]["code"] = lang_match.group(2).strip()
+
     return parsed
-
+    
 def load_and_parse_courses_from_json(file_path="dataWeb.json"):
     """Loads courses from JSON and populates global data structures."""
     global COURSES_DATA, COURSE_CONTENT_DETAILS
@@ -726,9 +717,16 @@ def show_course_detail(course_id):
     if course_content.get('overview'):
         st.markdown("###  ⓘ  About the Lesson")
         # Perform the replacement operations outside the f-string
-        overview_html = course_content['overview']
-        st.markdown(f"<div style='background:rgba(15,23,42,0.35); padding:1.5rem; border-radius:15px; margin:0.5rem 0; border:1px solid rgba(148,163,184,0.1); backdrop-filter:blur(10px);'><p style='font-size:1rem; color:#e2e8f0; line-height:1.7; text-align:justify;'>{overview_html}</p></div>", unsafe_allow_html=True)
-
+        overview_html = course_content['overview'].replace('\n\n', '<br><br>').replace('\n', '<br>')
+        st.markdown(
+            f"""
+            <div style='background:rgba(15,23,42,0.35); padding:1.5rem; border-radius:15px; margin:1rem 0; border:1px solid rgba(148,163,184,0.1); backdrop-filter:blur(10px);'>
+                <p style='font-size:1rem; color:#e2e8f0; line-height:1.7; text-align:justify;'>{overview_html}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
     st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('key_concepts'):
         st.markdown("### 💡 Main Concept")
