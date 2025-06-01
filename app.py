@@ -644,7 +644,7 @@ def display_chatbot():
 
 
 def display_course_list():
-    st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
+    # st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
 
     if st.session_state.get('selected_course_for_detail'):
         show_course_detail(st.session_state.selected_course_for_detail)
@@ -711,11 +711,11 @@ def show_course_detail(course_id):
     course_meta = next((c for c in COURSES_DATA if c['id'] == course_id), None)
     course_content = COURSE_CONTENT_DETAILS.get(course_id)
 
-    # if not course_meta or not course_content:
-    #     st.error("Detail topik tidak ditemukan.")
-    #     if st.button("Back to the Course List", key="detail_back_err", use_container_width=True):
-    #         navigate_to("Course List")
-    #     return
+    if not course_meta or not course_content:
+        st.error("Detail topik tidak ditemukan.")
+        if st.button("Back to the Course List", key="detail_back_err", use_container_width=True):
+            navigate_to("Course List")
+        return
 
     st.markdown(f"""
     <div style='background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); padding:2rem; border-radius:20px; margin:1rem 0 2rem 0; text-align:center; border:1px solid rgba(148,163,184,0.15);'>
