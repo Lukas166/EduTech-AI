@@ -52,9 +52,9 @@ class RAGChatbot:
 
 RULES:
 1. Answer in english by default.
-2. Answer ONLY based on the provided context from the knowledge base.
+2. Answer ONLY based on the provided context from the knowledge base (you must compare user input with given responses too.
 3. You can respond to greetings (hi, hello, thanks, goodbye) in a friendly way, you can also answer about who you are.
-4. For CS questions NOT covered in the context, politely say you don't have information about that specific topic
+4. For CS questions NOT covered in the context, politely say you cant recommend the topic from the course, but explain it a bit and recommend them study outside, give the reference.
 6. If the similarity of context quite low, check correctly if there is a misstyping, and ask again. example: user input: abstrction, answer: do you mean abstraction, if it is, then bla bla...
 7. If the context doesn't contain relevant information for the question, admit you don't know, and ask the question again.
 8. Please explain it further in new paragraph after, relevant to the answer.
@@ -168,6 +168,7 @@ RULES:
         4. Generate response dengan Gemini
         5. Translate response kembali ke bahasa input
         """
+        
         # Step 1: Deteksi bahasa input
         detected_lang = self.detect_language(user_query)
         
@@ -178,9 +179,10 @@ RULES:
         print(f"Mencari context relevan (top-{self.top_k})...")
         contexts = self._search_context(english_query)
         
-        # Step 4: Format prompt dengan instruksi bahasa
+        # Step 4: Format prompt dengan instruksi yang lebih baik
         lang_instruction = f"IMPORTANT: Respond ONLY in the same language as this original user question: '{user_query}'. Do not provide multiple language versions or translations."
         
+        # Buat prompt yang lebih eksplisit tentang kapan harus merekomendasikan course
         prompt = f"""{self.system_prompt}
 
 {self._format_context(contexts)}
@@ -191,23 +193,42 @@ RULES:
 
 Current User Question: {user_query}
 
-Please provide a helpful response based on the context above."""
+Please provide a helpful response based on the context above. At the end of your response, if you think the user would benefit from seeing the full course material on one of these topics, include a recommendation like this exactly:
 
-        try:
-            print("CS Helper bot is answering...")
-            response = self.gemini_model.generate_content(prompt)
-            bot_response = response.text.strip()
+RECOMMENDED_COURSE: [course_id]
+
+Otherwise, don't include this line."""
+
+    try:
+        print("CS Helper bot is answering...")
+        response = self.gemini_model.generate_content(prompt)
+        bot_response = response.text.strip()
+        
+        # Cek apakah ada rekomendasi course dari Gemini
+        recommended_course = None
+        if "RECOMMENDED_COURSE:" in bot_response:
+            # Ekstrak course_id dari response
+            parts = bot_response.split("RECOMMENDED_COURSE:")
+            bot_response = parts[0].strip()
+            recommended_course = parts[1].strip()
             
-            # Update history dengan bahasa asli user
-            self._update_history(user_query, bot_response)
-            return bot_response, contexts, detected_lang
+            # Hapus kurung siku jika ada
+            recommended_course = recommended_course.replace("[", "").replace("]", "").strip()
             
-        except Exception as e:
-            error_msg = f"Maaf, terjadi error: {str(e)}"
-            # Translate error message ke bahasa user jika perlu
-            if detected_lang != 'en':
-                error_msg = self.translate_from_english("Sorry, an error occurred: " + str(e), detected_lang)
-            return error_msg, contexts, detected_lang
+            # Verifikasi course_id valid
+            if not any(course['id'] == recommended_course for course in COURSES_DATA):
+                recommended_course = None
+        
+        # Update history dengan bahasa asli user
+        self._update_history(user_query, bot_response)
+        return bot_response, recommended_course, detected_lang
+            
+    except Exception as e:
+        error_msg = f"Maaf, terjadi error: {str(e)}"
+        # Translate error message ke bahasa user jika perlu
+        if detected_lang != 'en':
+            error_msg = self.translator.translate(error_msg, dest=detected_lang).text
+        return error_msg, None, detected_lang
 
     def chat(self, user_query):
         """
