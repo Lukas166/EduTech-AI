@@ -16,44 +16,52 @@ COURSES_PER_PAGE_DASHBOARD = 3
 # --- Helper Functions for Data Loading and Parsing ---
 def parse_course_content(content_text):
     parsed = {
-        "overview": [],
+        "overview": "",
         "key_concepts": [],
         "code_example": {"language": None, "code": ""},
         "applications": []
     }
 
-    # Extract each section using regex
-    overview_match = re.split(r'\n\s*Key Concepts:\s*', content_text, flags=re.IGNORECASE)
-    if len(overview_match) > 1:
-        parsed["overview"] = overview_match[0].strip()
-        rest = overview_match[1]
+    # Pisahkan overview dari Key Concepts
+    overview_split = re.split(r'\n\s*Key Concepts:\s*\n', content_text, flags=re.IGNORECASE)
+    if len(overview_split) > 1:
+        parsed["overview"] = overview_split[0].strip()
+        rest = overview_split[1]
     else:
         parsed["overview"] = content_text.strip()
-        return parsed  # return early, no other sections found
+        return parsed  # jika tidak ada bagian lain
 
-    # Extract Key Concepts
-    code_match = re.split(r'\n\s*Code Example:\s*', rest, flags=re.IGNORECASE)
-    if len(code_match) > 1:
-        key_concepts_block = code_match[0]
-        parsed["key_concepts"] = [c.strip() for c in key_concepts_block.strip().splitlines() if c.strip()]
-        rest = code_match[1]
+    # Pisahkan Key Concepts dari Code Example
+    key_split = re.split(r'\n\s*Code Example:\s*\n', rest, flags=re.IGNORECASE)
+    if len(key_split) > 1:
+        key_concepts_block = key_split[0].strip()
+        rest = key_split[1]
     else:
-        parsed["key_concepts"] = [c.strip() for c in rest.strip().splitlines() if c.strip()]
-        return parsed
+        key_concepts_block = rest.strip()
+        rest = ""
 
-    # Extract Code Example
-    app_match = re.split(r'\n\s*Applications:\s*', rest, flags=re.IGNORECASE)
-    if len(app_match) > 1:
-        code_block = app_match[0]
-        parsed["applications"] = [a.strip() for a in app_match[1].strip().splitlines() if a.strip()]
+    parsed["key_concepts"] = [line.strip() for line in key_concepts_block.splitlines() if line.strip()]
+
+    # Pisahkan Code Example dari Applications
+    code_split = re.split(r'\n\s*Applications:\s*\n', rest, flags=re.IGNORECASE)
+    if len(code_split) > 1:
+        code_block = code_split[0].strip()
+        apps_block = code_split[1].strip()
     else:
         code_block = rest.strip()
+        apps_block = ""
 
-    # Extract language and code
-    lang_match = re.match(r'(\w+):\s*```[\w]*\n([\s\S]*?)```', code_block.strip(), flags=re.IGNORECASE)
+    # Ambil bahasa dan kode program
+    lang_match = re.search(r'(\w+):\s*```(?:\w+)?\s*\n([\s\S]*?)```', code_block, flags=re.IGNORECASE)
     if lang_match:
         parsed["code_example"]["language"] = lang_match.group(1).strip().lower()
-        parsed["code_example"]["code"] = lang_match.group(2).strip()
+        parsed["code_example"]["code"] = html.unescape(
+            lang_match.group(2)
+        ).strip().replace('</p>', '').replace('</div>', '')
+
+    # Ambil Applications
+    if apps_block:
+        parsed["applications"] = [line.strip() for line in apps_block.splitlines() if line.strip()]
 
     return parsed
     
