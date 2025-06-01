@@ -644,7 +644,7 @@ def display_chatbot():
 
 
 def display_course_list():
-    # st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
 
     if st.session_state.get('selected_course_for_detail'):
         show_course_detail(st.session_state.selected_course_for_detail)
@@ -677,13 +677,13 @@ def display_course_list():
     elif not filtered_courses:
         st.markdown("<div style='text-align:center;padding:2rem;background:rgba(15,23,42,0.3);border-radius:15px;'><div style='font-size:3rem;'>🚫</div><h3>Topik tidak ditemukan</h3><p>Coba kata kunci lain.</p></div>", unsafe_allow_html=True)
     else:
-        for i in range(0, len(filtered_courses), 2):
-            cols = st.columns(2)
-            for j, col_widget in enumerate(cols):
-                if i + j < len(filtered_courses):
-                    course = filtered_courses[i + j]
-                    with col_widget:
-                        display_course_card_item(course) # Renamed for clarity
+        # for i in range(0, len(filtered_courses), 2):
+        #     cols = st.columns(2)
+        #     for j, col_widget in enumerate(cols):
+        #         if i + j < len(filtered_courses):
+        #             course = filtered_courses[i + j]
+        #             with col_widget:
+        #                 display_course_card_item(course) # Renamed for clarity
 
 def display_course_card_item(course): # Was display_course_card_detailed
     """Display individual course card in the list view."""
