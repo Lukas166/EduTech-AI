@@ -615,20 +615,33 @@ def display_chatbot():
             st.markdown(prompt)
 
         with st.spinner("AI is thinking..."):
-            bot_response_text, recommended_course, _ = chatbot_instance.generate_response(prompt)
+            bot_response_text, contexts, _ = chatbot_instance.generate_response(prompt)
         
-        # Add course link only if Gemini specifically recommended it
-        if recommended_course:
-            matching_course = next((c for c in COURSES_DATA if c['id'] == recommended_course), None)
+        assistant_message_content = bot_response_text
+
+        # Add link if relevant context found and it's a course ID
+        if contexts and contexts[0]['similarity'] > 0.7: # Adjust threshold as needed
+            relevant_course_id = contexts[0]['tag']
+            # Check if this tag is a valid course ID from our loaded courses
+            matching_course = next((c for c in COURSES_DATA if c['id'] == relevant_course_id), None)
             if matching_course:
                 course_title = matching_course['title']
-                encoded_course_id = urllib.parse.quote_plus(recommended_course)
-                link_query_params = f"page=Course+List&course_id={encoded_course_id}"
-                bot_response_text += f"\n\nFor more detailed information, you can view the full course: [**{course_title}**](?{link_query_params})"
-        
-        st.session_state.messages.append({"role": "assistant", "content": bot_response_text})
-        st.rerun()
+                # Construct URL with query parameters. Page name needs to be URL encoded if it has spaces.
+                # Streamlit handles this automatically if we pass dict to st.query_params
+                # For markdown link, manually create the query string part
+                encoded_relevant_course_id = urllib.parse.quote_plus(relevant_course_id)
 
+                link_query_params = f"page=Course+List&course_id={encoded_relevant_course_id}" # Menggunakan ID yang sudah di-encode
+                
+                # Streamlit base URL is handled by browser, so relative link is fine
+                # For links in markdown to trigger st.query_params, they might need to be full or relative path
+                # A simple query string like "?page=...&course_id=..." works.
+                link_markdown = f"\n\nTo learn more, you can view the topic here: [**{course_title}**](?{link_query_params})"
+                assistant_message_content += link_markdown
+        
+        st.session_state.messages.append({"role": "assistant", "content": assistant_message_content})
+        st.rerun()
+        
 def display_course_list():
     # st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
 
