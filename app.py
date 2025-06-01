@@ -4,6 +4,7 @@ import re
 import os
 import urllib.parse
 from bots import RAGChatbot # Assuming bot.py is in the same directory
+import html
 
 # --- Page Configuration ---
 st.set_page_config(layout="wide", page_title="Platform Edukasi AI", page_icon="🎓")
