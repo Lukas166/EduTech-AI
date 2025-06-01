@@ -676,7 +676,7 @@ def display_course_list():
         st.info("Katalog topik sedang disiapkan. Silakan cek kembali nanti.")
     elif not filtered_courses:
         st.markdown("<div style='text-align:center;padding:2rem;background:rgba(15,23,42,0.3);border-radius:15px;'><div style='font-size:3rem;'>🚫</div><h3>Topik tidak ditemukan</h3><p>Coba kata kunci lain.</p></div>", unsafe_allow_html=True)
-    else:
+    # else:
         # for i in range(0, len(filtered_courses), 2):
         #     cols = st.columns(2)
         #     for j, col_widget in enumerate(cols):
