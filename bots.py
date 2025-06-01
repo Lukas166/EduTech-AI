@@ -168,7 +168,6 @@ RULES:
         4. Generate response dengan Gemini
         5. Translate response kembali ke bahasa input
         """
-        
         # Step 1: Deteksi bahasa input
         detected_lang = self.detect_language(user_query)
         
@@ -179,10 +178,9 @@ RULES:
         print(f"Mencari context relevan (top-{self.top_k})...")
         contexts = self._search_context(english_query)
         
-        # Step 4: Format prompt dengan instruksi yang lebih baik
+        # Step 4: Format prompt dengan instruksi bahasa
         lang_instruction = f"IMPORTANT: Respond ONLY in the same language as this original user question: '{user_query}'. Do not provide multiple language versions or translations."
         
-        # Buat prompt yang lebih eksplisit tentang kapan harus merekomendasikan course
         prompt = f"""{self.system_prompt}
 
 {self._format_context(contexts)}
@@ -193,46 +191,23 @@ RULES:
 
 Current User Question: {user_query}
 
-Rules for responding:
-1. Answer in the same language as the question
-2. Only recommend a course if ALL these conditions are met:
-   - The question is specifically about a computer science topic
-   - You found highly relevant context (similarity > 0.4)
-   - The course material would genuinely help the user understand better
-3. If recommending a course, include EXACTLY this line at the end:
-   SUGGESTED_COURSE: [course_id]
-4. For greetings, thanks, or non-CS questions, don't suggest any course"""
+Please provide a helpful response based on the context above."""
 
-    try:
-        print("CS Helper bot is answering...")
-        response = self.gemini_model.generate_content(prompt)
-        bot_response = response.text.strip()
-        
-        # Cek apakah ada rekomendasi course dari Gemini
-        recommended_course = None
-        if "RECOMMENDED_COURSE:" in bot_response:
-            # Ekstrak course_id dari response
-            parts = bot_response.split("RECOMMENDED_COURSE:")
-            bot_response = parts[0].strip()
-            recommended_course = parts[1].strip()
+        try:
+            print("CS Helper bot is answering...")
+            response = self.gemini_model.generate_content(prompt)
+            bot_response = response.text.strip()
             
-            # Hapus kurung siku jika ada
-            recommended_course = recommended_course.replace("[", "").replace("]", "").strip()
+            # Update history dengan bahasa asli user
+            self._update_history(user_query, bot_response)
+            return bot_response, contexts, detected_lang
             
-            # Verifikasi course_id valid
-            if not any(course['id'] == recommended_course for course in COURSES_DATA):
-                recommended_course = None
-        
-        # Update history dengan bahasa asli user
-        self._update_history(user_query, bot_response)
-        return bot_response, recommended_course, detected_lang
-            
-    except Exception as e:
-        error_msg = f"Maaf, terjadi error: {str(e)}"
-        # Translate error message ke bahasa user jika perlu
-        if detected_lang != 'en':
-            error_msg = self.translator.translate(error_msg, dest=detected_lang).text
-        return error_msg, None, detected_lang
+        except Exception as e:
+            error_msg = f"Maaf, terjadi error: {str(e)}"
+            # Translate error message ke bahasa user jika perlu
+            if detected_lang != 'en':
+                error_msg = self.translate_from_english("Sorry, an error occurred: " + str(e), detected_lang)
+            return error_msg, contexts, detected_lang
 
     def chat(self, user_query):
         """
