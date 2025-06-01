@@ -15,7 +15,7 @@ COURSES_PER_PAGE_DASHBOARD = 3
 
 # --- Helper Functions for Data Loading and Parsing ---
 def parse_course_content(content_text):
-    """Parses the raw content string into a structured dictionary with improved code extraction."""
+    """Parses the raw content string into a structured dictionary."""
     parsed = {
         "overview": [],
         "key_concepts": [],
@@ -33,57 +33,47 @@ def parse_course_content(content_text):
         
         if block_lower.startswith("key concepts:"):
             current_section = "key_concepts"
-            concept_list_str = block[len("Key Concepts:"):].strip()
+            # Remove the header from the block content
+            concept_list_str = block[len("key concepts:"):].strip()
             if concept_list_str:
-                # Handle both bulleted and plain text concepts
-                parsed["key_concepts"] = [
-                    re.sub(r'^[-\*]\s*', '', c.strip()) 
-                    for c in re.split(r'\n', concept_list_str) 
-                    if c.strip()
-                ]
-                
-        elif block_lower.startswith("code example:"):
+                # Split concepts by newlines and clean each item
+                parsed["key_concepts"] = [c.strip() for c in re.split(r'\n', concept_list_str) if c.strip()]
+        elif "code example:" in block_lower:
             current_section = "code_example"
-            # Enhanced regex pattern to handle code blocks more reliably
+            # Extract language and code block using more flexible regex
             match_lang_code = re.search(
-                r"Code Example:\s*(\w+):\s*\n```(?:python)?\n([\s\S]*?)```",
-                block,
+                r"code example:\s*(\w+):?\s*\n```\w*\n([\s\S]*?)\n```", 
+                block, 
                 re.IGNORECASE
             )
             if match_lang_code:
                 parsed["code_example"]["language"] = match_lang_code.group(1).strip().lower()
                 parsed["code_example"]["code"] = match_lang_code.group(2).strip()
             else:
-                # Fallback: Try to extract just the code block if standard format fails
-                code_match = re.search(r'```(?:python)?\n([\s\S]*?)```', block)
-                if code_match:
-                    parsed["code_example"]["code"] = code_match.group(1).strip()
-                    parsed["code_example"]["language"] = "python"  # Default to python
-                else:
-                    parsed["overview"].append(block)
-                    
+                # Fallback: try to extract just the code block
+                match_code = re.search(r"```\w*\n([\s\S]*?)\n```", block)
+                if match_code:
+                    parsed["code_example"]["code"] = match_code.group(1).strip()
+                    # Try to guess language from first line
+                    first_line = parsed["code_example"]["code"].split('\n')[0]
+                    if any(kw in first_line for kw in ['def ', 'class ', 'import ']):
+                        parsed["code_example"]["language"] = "python"
         elif block_lower.startswith("applications:"):
             current_section = "applications"
-            app_text = block[len("Applications:"):].strip()
-            if app_text:
-                # Handle both bulleted and plain text applications
-                parsed["applications"] = [
-                    re.sub(r'^[-\*]\s*', '', a.strip())
-                    for a in re.split(r'\n', app_text)
-                    if a.strip()
-                ]
+            app_list_str = block[len("applications:"):].strip()
+            if app_list_str:
+                parsed["applications"] = [a.strip() for a in re.split(r'\n\s*[-*]?\s*', app_list_str) if a.strip()]
         else:
-            if current_section in parsed:
-                if isinstance(parsed[current_section], list):
-                    parsed[current_section].append(block.strip())
-                else:
-                    # For code_example which is a dict
-                    parsed["overview"].append(block.strip())
-            else:
+            # If it's not a special section header, add to current or default to overview
+            if current_section == "overview":
                 parsed["overview"].append(block.strip())
-    
-    # Join overview paragraphs for cleaner output
-    parsed["overview"] = "\n\n".join(parsed["overview"]) if parsed["overview"] else ""
+            elif current_section == "key_concepts" and block.strip():
+                parsed["key_concepts"].extend([c.strip() for c in re.split(r'\n', block) if c.strip()])
+            elif current_section == "applications" and block.strip():
+                parsed["applications"].extend([a.strip() for a in re.split(r'\n\s*[-*]?\s*', block) if a.strip()])
+
+    # Join overview paragraphs
+    parsed["overview"] = "\n\n".join(parsed["overview"])
     
     return parsed
 
