@@ -743,7 +743,7 @@ def show_course_detail(course_id):
 
     st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('applications'):
-        st.markdown("### 🔻 Realworld Application")
+        st.markdown("### 🔻  Realworld Application")
         for app in course_content['applications']:
             st.markdown(f"<div style='background:rgba(16,185,129,0.08); padding:0.8rem 1rem; border-radius:10px; margin:0.5rem 0; border:1px solid rgba(16,185,129,0.15); display:flex; align-items:center; gap:0.75rem;'><p style='color:#e2e8f0; margin:0; font-size:0.95rem;'>{app}</p></div>", unsafe_allow_html=True)
 
