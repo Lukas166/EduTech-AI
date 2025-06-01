@@ -723,6 +723,11 @@ def show_course_detail(course_id):
     #     <p style='font-size:1.1rem; color:#cbd5e1; line-height:1.6; max-width:750px; margin:0 auto;'>{course_meta['description']}</p>
     # </div>""", unsafe_allow_html=True)
 
+    st.markdown(f"""
+    <div>
+        <h1 style='font-size:2.5rem; margin-bottom:0.75rem; color:#f0f0f0;'>{course_meta['title']}</h1>
+    </div>""", unsafe_allow_html=True)
+    
     if course_content.get('overview'):
         st.markdown("###  ⓘ  About the Lesson")
         # Perform the replacement operations outside the f-string
