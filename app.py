@@ -730,20 +730,20 @@ def show_course_detail(course_id):
 
     st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('key_concepts'):
-        st.markdown("### Main Concept")
+        st.markdown("### 💡 Main Concept")
         for i, concept in enumerate(course_content['key_concepts']):
             st.markdown(f"<div style='background:rgba(15,23,42,0.25); padding:1rem 1.25rem; border-radius:12px; margin:0.5rem 0; border-left:3px solid #3b82f6;'><h5 style='color:white; margin-bottom:0.3rem; font-size:1.1rem; background:none; -webkit-text-fill-color:unset;'>{i+1}. {concept.split(': ')[0]}</h5><p style='color:#cbd5e1; font-size:1rem; line-height:1.6; margin:0;'>{': '.join(concept.split(': ')[1:]) if ': ' in concept else ''}</p></div>", unsafe_allow_html=True)
 
     st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('code_example') and course_content['code_example'].get('code'):
-        st.markdown("### Example code")
+        st.markdown("### ⌨️ Example code")
         lang = course_content['code_example'].get('language', 'plaintext')
         code = course_content['code_example'].get('code', '')
         st.code(code, language=lang, line_numbers=True)
 
     st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('applications'):
-        st.markdown("### Realworld Application")
+        st.markdown("### 🔻 Realworld Application")
         for app in course_content['applications']:
             st.markdown(f"<div style='background:rgba(16,185,129,0.08); padding:0.8rem 1rem; border-radius:10px; margin:0.5rem 0; border:1px solid rgba(16,185,129,0.15); display:flex; align-items:center; gap:0.75rem;'><p style='color:#e2e8f0; margin:0; font-size:0.95rem;'>{app}</p></div>", unsafe_allow_html=True)
 
