@@ -717,14 +717,8 @@ def show_course_detail(course_id):
             navigate_to("Course List")
         return
 
-    # st.markdown(f"""
-    # <div style='background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); padding:2rem; border-radius:20px; margin:1rem 0 2rem 0; text-align:center; border:1px solid rgba(148,163,184,0.15);'>
-    #     <h1 style='font-size:2.5rem; margin-bottom:0.75rem; color:#f0f0f0;'>{course_meta['title']}</h1>
-    #     <p style='font-size:1.1rem; color:#cbd5e1; line-height:1.6; max-width:750px; margin:0 auto;'>{course_meta['description']}</p>
-    # </div>""", unsafe_allow_html=True)
-
     st.markdown(f"""
-    <div>
+    <div style='background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); padding:2rem; border-radius:20px; margin:1rem 0 2rem 0; text-align:center; border:1px solid rgba(148,163,184,0.15);'>
         <h1 style='font-size:2.5rem; margin-bottom:0.75rem; color:#f0f0f0;'>{course_meta['title']}</h1>
     </div>""", unsafe_allow_html=True)
     
