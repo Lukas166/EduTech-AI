@@ -515,8 +515,9 @@ def display_dashboard():
                     Consult our AI assistant for topic recommendations and concept explanations.
                 </p>
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
-                    <span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">💬 Tanya Seputar CS</span>
-                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">🎯 Rekomendasi Topik</span>
+                    <span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">💬 Ask about Computer Science</span>
+                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">🎯 Topic Recomendation</span>
+                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">📚 100+ Coure Available</span>
                 </div>
             </div>
         </div>
