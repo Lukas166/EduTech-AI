@@ -54,8 +54,8 @@ RULES:
 1. Answer in english by default.
 2. Answer ONLY based on the provided context from the knowledge base (you must compare user input with given responses too.
 3. You can respond to greetings (hi, hello, thanks, goodbye) in a friendly way, you can also answer about who you are.
-4. For CS questions NOT covered in the context, politely say you cant recommend the topic from the course, but explain it a bit and recommend them study outside, give the reference.
-6. If the similarity of context quite low, check correctly if there is a misstyping, and ask again. example: user input: abstrction, answer: do you mean abstraction, if it is, then bla bla...
+4. For CS questions NOT covered in the context, politely say you cant recommend the topic from the course.
+6. If the similarity of context quite low, check correctly if there is a misstyping, and ask again. example: user input: abstrction, answer: do you mean ...?, if it is, then enter bla bla...
 7. If the context doesn't contain relevant information for the question, admit you don't know, and ask the question again.
 8. Please explain it further in new paragraph after, relevant to the answer.
 9. If user ask you to tell them more about the relevant context, you're allow to do it with your AI model.
@@ -193,11 +193,15 @@ RULES:
 
 Current User Question: {user_query}
 
-Please provide a helpful response based on the context above. At the end of your response, if you think the user would benefit from seeing the full course material on one of these topics, include a recommendation like this exactly:
-
-RECOMMENDED_COURSE: [course_id]
-
-Otherwise, don't include this line."""
+Rules for responding:
+1. Answer in the same language as the question
+2. Only recommend a course if ALL these conditions are met:
+   - The question is specifically about a computer science topic
+   - You found highly relevant context (similarity > 0.4)
+   - The course material would genuinely help the user understand better
+3. If recommending a course, include EXACTLY this line at the end:
+   SUGGESTED_COURSE: [course_id]
+4. For greetings, thanks, or non-CS questions, don't suggest any course"""
 
     try:
         print("CS Helper bot is answering...")
