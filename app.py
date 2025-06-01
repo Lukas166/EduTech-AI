@@ -723,9 +723,10 @@ def show_course_detail(course_id):
     # </div>""", unsafe_allow_html=True)
 
     if course_content.get('overview'):
+        st.write("  ")
         st.markdown("###  About the Lesson")
         # Perform the replacement operations outside the f-string
-        overview_html = course_content['overview'].replace('\n', '<br>')
+        overview_html = course_content['overview']
         st.markdown(f"<div style='background:rgba(15,23,42,0.35); padding:1.5rem; border-radius:15px; margin:1rem 0; border:1px solid rgba(148,163,184,0.1); backdrop-filter:blur(10px);'><p style='font-size:1rem; color:#e2e8f0; line-height:1.7; text-align:justify;'>{overview_html}</p></div>", unsafe_allow_html=True)
 
     if course_content.get('key_concepts'):
