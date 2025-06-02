@@ -527,7 +527,7 @@ def display_dashboard():
         navigate_to("Chatbot")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div style='text-align: center; margin: 2rem 0 1rem 0;'><h2 style='font-size: 2.2rem; margin-bottom: 0.5rem;'>Exploration our Course</h2></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; margin: 2rem 0 1rem 0;'><h2 style='font-size: 2.2rem; margin-bottom: 0.5rem;'>Explore our Course</h2></div>", unsafe_allow_html=True)
 
     total_courses = len(COURSES_DATA)
     current_page_state = st.session_state.get('current_dashboard_page', 0)
