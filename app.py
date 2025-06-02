@@ -609,6 +609,16 @@ def display_chatbot():
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True) # Allow HTML for links
 
+    if contexts and contexts[0]['similarity'] > 0:
+            with st.expander("🔍 Lihat Detail Relevansi"):
+                st.markdown(f"**Top {len(contexts)} Konteks Terkait:**")
+                for i, ctx in enumerate(contexts, 1):
+                    st.markdown(f"""
+                    {i}. **{ctx['tag']}**  
+                    ⚡ Similarity: `{ctx['similarity']:.3f}`  
+                    📝 Pola Pertanyaan: *"{ctx['pattern']}"*
+                    """)
+                    
     if prompt := st.chat_input("Ask about Computer Science", key="chatbot_input"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
