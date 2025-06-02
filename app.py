@@ -609,7 +609,7 @@ def display_chatbot():
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True) # Allow HTML for links
 
-    if contexts and contexts[0]['similarity'] > 0:
+    if contexts[0]['similarity'] > 0:
             with st.expander("🔍 Lihat Detail Relevansi"):
                 st.markdown(f"**Top {len(contexts)} Konteks Terkait:**")
                 for i, ctx in enumerate(contexts, 1):
