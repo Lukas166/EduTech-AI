@@ -23,8 +23,8 @@ def preprocess_text(text):
     return ' '.join(text.lower().strip().split())
 
 class RAGChatbot:
-    def __init__(self, faq_file="faq.json", model_path="best_embedding_model", top_k=5, max_history=10, 
-                 temperature=1, top_p=0.9, top_k_gen=40):
+    def __init__(self, faq_file="faq.json", model_path="best_embedding_model", top_k=8, max_history=10, 
+                 temperature=0.7, top_p=0.9, top_k_gen=40):
         self.top_k = top_k
         self.max_history = max_history
         self.chat_history = []
