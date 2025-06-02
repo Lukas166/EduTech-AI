@@ -4,6 +4,7 @@ import re
 import os
 import urllib.parse
 from bots import RAGChatbot # Assuming bot.py is in the same directory
+import html
 
 # --- Page Configuration ---
 st.set_page_config(layout="wide", page_title="Platform Edukasi AI", page_icon="🎓")
@@ -15,57 +16,56 @@ COURSES_PER_PAGE_DASHBOARD = 3
 
 # --- Helper Functions for Data Loading and Parsing ---
 def parse_course_content(content_text):
-    """Parses the raw content string into a structured dictionary."""
     parsed = {
-        "overview": [],
+        "overview": "",
         "key_concepts": [],
         "code_example": {"language": None, "code": ""},
         "applications": []
     }
-    
-    # Split content into logical blocks (paragraphs or sections)
-    # Using a more robust split that handles multiple newlines and retains some structure
-    blocks = re.split(r'\n\s*\n+', content_text.strip())
-    
-    current_section = "overview" # Default section
 
-    for block in blocks:
-        block_lower = block.lower()
-        
-        if block_lower.startswith("key concepts:"):
-            current_section = "key_concepts"
-            # Remove the header from the block content
-            concept_list_str = block[len("key concepts:"):].strip()
-            if concept_list_str:
-                # Assuming concepts are listed with '-' or '* ' or just newlines
-                parsed["key_concepts"] = [c.strip() for c in re.split(r'\n\s*[-*]?\s*', concept_list_str) if c.strip()]
-        elif block_lower.startswith("code example:"):
-            current_section = "code_example"
-            # Extract language and code block
-            match_lang_code = re.search(r"code example:\s*(\w+):\s*\n```\w*\n([\s\S]*?)\n```", block, re.IGNORECASE | re.DOTALL)
-            if match_lang_code:
-                parsed["code_example"]["language"] = match_lang_code.group(1).strip().lower()
-                parsed["code_example"]["code"] = match_lang_code.group(2).strip()
-            else: # Fallback if regex fails, add as overview
-                 parsed["overview"].append(block)
-        elif block_lower.startswith("applications:"):
-            current_section = "applications"
-            app_list_str = block[len("applications:"):].strip()
-            if app_list_str:
-                 parsed["applications"] = [a.strip() for a in re.split(r'\n\s*[-*]?\s*', app_list_str) if a.strip()]
-        else:
-            # If it's not a special section header, add to current or default to overview
-            if current_section == "overview":
-                 parsed["overview"].append(block.strip())
-            # If it's part of a section already being processed (e.g. more concepts/apps without new header)
-            # This part might need more sophisticated logic if sections are interleaved without headers.
-            # For now, unheadered blocks go to overview unless a section was just started.
+    # Pisahkan overview dari Key Concepts
+    overview_split = re.split(r'\n\s*Key Concepts:\s*\n', content_text, flags=re.IGNORECASE)
+    if len(overview_split) > 1:
+        parsed["overview"] = overview_split[0].strip()
+        rest = overview_split[1]
+    else:
+        parsed["overview"] = content_text.strip()
+        return parsed  # jika tidak ada bagian lain
 
-    # Join overview paragraphs
-    parsed["overview"] = "\n\n".join(parsed["overview"])
-    
+    # Pisahkan Key Concepts dari Code Example
+    key_split = re.split(r'\n\s*Code Example:\s*\n', rest, flags=re.IGNORECASE)
+    if len(key_split) > 1:
+        key_concepts_block = key_split[0].strip()
+        rest = key_split[1]
+    else:
+        key_concepts_block = rest.strip()
+        rest = ""
+
+    parsed["key_concepts"] = [line.strip() for line in key_concepts_block.splitlines() if line.strip()]
+
+    # Pisahkan Code Example dari Applications
+    code_split = re.split(r'\n\s*Applications:\s*\n', rest, flags=re.IGNORECASE)
+    if len(code_split) > 1:
+        code_block = code_split[0].strip()
+        apps_block = code_split[1].strip()
+    else:
+        code_block = rest.strip()
+        apps_block = ""
+
+    # Ambil bahasa dan kode program
+    lang_match = re.search(r'(\w+):\s*```(?:\w+)?\s*\n([\s\S]*?)```', code_block, flags=re.IGNORECASE)
+    if lang_match:
+        parsed["code_example"]["language"] = lang_match.group(1).strip().lower()
+        parsed["code_example"]["code"] = html.unescape(
+            lang_match.group(2)
+        ).strip().replace('</p>', '').replace('</div>', '')
+
+    # Ambil Applications
+    if apps_block:
+        parsed["applications"] = [line.strip() for line in apps_block.splitlines() if line.strip()]
+
     return parsed
-
+    
 def load_and_parse_courses_from_json(file_path="dataWeb.json"):
     """Loads courses from JSON and populates global data structures."""
     global COURSES_DATA, COURSE_CONTENT_DETAILS
@@ -515,8 +515,9 @@ def display_dashboard():
                     Consult our AI assistant for topic recommendations and concept explanations.
                 </p>
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
-                    <span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">💬 Tanya Seputar CS</span>
-                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">🎯 Rekomendasi Topik</span>
+                    <span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">💬 Ask about Computer Science</span>
+                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">🎯 Topic Recomendation</span>
+                    <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">📚 100+ Course Available</span>
                 </div>
             </div>
         </div>
@@ -607,7 +608,7 @@ def display_chatbot():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True) # Allow HTML for links
-
+                    
     if prompt := st.chat_input("Ask about Computer Science", key="chatbot_input"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -619,7 +620,7 @@ def display_chatbot():
         assistant_message_content = bot_response_text
 
         # Add link if relevant context found and it's a course ID
-        if contexts and contexts[0]['similarity'] > 0.7: # Adjust threshold as needed
+        if contexts and contexts[0]['similarity'] > 0.65: # Adjust threshold as needed
             relevant_course_id = contexts[0]['tag']
             # Check if this tag is a valid course ID from our loaded courses
             matching_course = next((c for c in COURSES_DATA if c['id'] == relevant_course_id), None)
@@ -640,10 +641,9 @@ def display_chatbot():
         
         st.session_state.messages.append({"role": "assistant", "content": assistant_message_content})
         st.rerun()
-
-
+        
 def display_course_list():
-    st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
+    # st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 style='font-size: 2.5rem;'>Course List</h1></div>", unsafe_allow_html=True)
 
     if st.session_state.get('selected_course_for_detail'):
         show_course_detail(st.session_state.selected_course_for_detail)
@@ -719,31 +719,41 @@ def show_course_detail(course_id):
     st.markdown(f"""
     <div style='background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); padding:2rem; border-radius:20px; margin:1rem 0 2rem 0; text-align:center; border:1px solid rgba(148,163,184,0.15);'>
         <h1 style='font-size:2.5rem; margin-bottom:0.75rem; color:#f0f0f0;'>{course_meta['title']}</h1>
-        <p style='font-size:1.1rem; color:#cbd5e1; line-height:1.6; max-width:750px; margin:0 auto;'>{course_meta['description']}</p>
     </div>""", unsafe_allow_html=True)
-
+    
     if course_content.get('overview'):
-        st.markdown("###  About the Lesson")
+        st.markdown("###  ⓘ  About the Lesson")
         # Perform the replacement operations outside the f-string
         overview_html = course_content['overview'].replace('\n\n', '<br><br>').replace('\n', '<br>')
-        st.markdown(f"<div style='background:rgba(15,23,42,0.35); padding:1.5rem; border-radius:15px; margin:1rem 0; border:1px solid rgba(148,163,184,0.1); backdrop-filter:blur(10px);'><p style='font-size:1rem; color:#e2e8f0; line-height:1.7; text-align:justify;'>{overview_html}</p></div>", unsafe_allow_html=True)
-
+        st.markdown(
+            f"""
+            <div style='background:rgba(15,23,42,0.35); padding:1.5rem; border-radius:15px; margin:1rem 0; border:1px solid rgba(148,163,184,0.1); backdrop-filter:blur(10px);'>
+                <p style='font-size:1rem; color:#e2e8f0; line-height:1.7; text-align:justify;'>{overview_html}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+    st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('key_concepts'):
-        st.markdown("### Main Concept")
+        st.markdown("### 💡 Main Concept")
         for i, concept in enumerate(course_content['key_concepts']):
-            st.markdown(f"<div style='background:rgba(15,23,42,0.25); padding:1rem 1.25rem; border-radius:12px; margin:0.75rem 0; border-left:3px solid #3b82f6;'><h5 style='color:#60a5fa; margin-bottom:0.3rem; font-size:1.1rem; background:none; -webkit-text-fill-color:unset;'>{i+1}. {concept.split(': ')[0]}</h5><p style='color:#cbd5e1; font-size:0.95rem; line-height:1.6; margin:0;'>{': '.join(concept.split(': ')[1:]) if ': ' in concept else ''}</p></div>", unsafe_allow_html=True)
-            
+            st.markdown(f"<div style='background:rgba(15,23,42,0.25); padding:1rem 1.25rem; border-radius:12px; margin:0.5rem 0; border-left:3px solid #3b82f6;'><h5 style='color:white; margin-bottom:0.3rem; font-size:1.1rem; background:none; -webkit-text-fill-color:unset;'>{i+1}. {concept.split(': ')[0]}</h5><p style='color:#cbd5e1; font-size:1rem; line-height:1.6; margin:0;'>{': '.join(concept.split(': ')[1:]) if ': ' in concept else ''}</p></div>", unsafe_allow_html=True)
+
+    st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('code_example') and course_content['code_example'].get('code'):
-        st.markdown("### Example code")
+        st.markdown("### 🖥️ Example code")
         lang = course_content['code_example'].get('language', 'plaintext')
         code = course_content['code_example'].get('code', '')
         st.code(code, language=lang, line_numbers=True)
 
+    st.markdown(f"<br>", unsafe_allow_html=True)
     if course_content.get('applications'):
-        st.markdown("### Realworld Application")
+        st.markdown("### 🔻 Realworld Application")
         for app in course_content['applications']:
-            st.markdown(f"<div style='background:rgba(16,185,129,0.08); padding:0.8rem 1rem; border-radius:10px; margin:0.5rem 0; border:1px solid rgba(16,185,129,0.15); display:flex; align-items:center; gap:0.75rem;'><p style='color:#e2e8f0; margin:0; font-size:0.95rem;'>{app}</p></div><br><br>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:rgba(16,185,129,0.08); padding:0.8rem 1rem; border-radius:10px; margin:0.5rem 0; border:1px solid rgba(16,185,129,0.15); display:flex; align-items:center; gap:0.75rem;'><p style='color:#e2e8f0; margin:0; font-size:0.95rem;'>{app}</p></div>", unsafe_allow_html=True)
 
+    st.markdown(f"<br><br>", unsafe_allow_html=True)
     if st.button("Back to Course List", key="back_to_list_detail", use_container_width=True):
         navigate_to("Course List")
 
@@ -767,5 +777,4 @@ def main():
         display_dashboard()
 
 if __name__ == "__main__":
-    
     main()
