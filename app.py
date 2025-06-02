@@ -608,16 +608,6 @@ def display_chatbot():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True) # Allow HTML for links
-
-    if contexts[0]['similarity'] > 0:
-            with st.expander("🔍 Lihat Detail Relevansi"):
-                st.markdown(f"**Top {len(contexts)} Konteks Terkait:**")
-                for i, ctx in enumerate(contexts, 1):
-                    st.markdown(f"""
-                    {i}. **{ctx['tag']}**  
-                    ⚡ Similarity: `{ctx['similarity']:.3f}`  
-                    📝 Pola Pertanyaan: *"{ctx['pattern']}"*
-                    """)
                     
     if prompt := st.chat_input("Ask about Computer Science", key="chatbot_input"):
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -631,6 +621,7 @@ def display_chatbot():
 
         # Add link if relevant context found and it's a course ID
         if contexts and contexts[0]['similarity'] > 0.65: # Adjust threshold as needed
+            print(contexts[0]['similarity'])
             relevant_course_id = contexts[0]['tag']
             # Check if this tag is a valid course ID from our loaded courses
             matching_course = next((c for c in COURSES_DATA if c['id'] == relevant_course_id), None)
