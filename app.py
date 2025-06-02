@@ -620,7 +620,7 @@ def display_chatbot():
         assistant_message_content = bot_response_text
 
         # Add link if relevant context found and it's a course ID
-        if contexts and contexts[0]['similarity'] > 0.6: # Adjust threshold as needed
+        if contexts and contexts[0]['similarity'] > 0.65: # Adjust threshold as needed
             relevant_course_id = contexts[0]['tag']
             # Check if this tag is a valid course ID from our loaded courses
             matching_course = next((c for c in COURSES_DATA if c['id'] == relevant_course_id), None)
