@@ -636,7 +636,7 @@ def display_chatbot():
                 # Streamlit base URL is handled by browser, so relative link is fine
                 # For links in markdown to trigger st.query_params, they might need to be full or relative path
                 # A simple query string like "?page=...&course_id=..." works.
-                link_markdown = f"\n\nTo learn more, you can view the topic here: {contexts[0]['similarity']} [**{course_title}**](?{link_query_params})"
+                link_markdown = f"\n\nTo learn more, you can view the topic here: [**{course_title}**](?{link_query_params})"
                 assistant_message_content += link_markdown
         
         st.session_state.messages.append({"role": "assistant", "content": assistant_message_content})
