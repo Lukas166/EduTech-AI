@@ -82,7 +82,7 @@ List of topic: abstraction, error, documentation, testing, datastructure, bst, d
 
 Example 1
 Questioner : Hi, I would like to ask about how does machine learning work?
-Assistant : Hi! That's a great question. Machine Learning (ML) is a subset of artificial intelligence (AI) that enables computers to learn from data and improve their performance over time without being explicitly programmed. To learn more about it, you could visit this web page about Machine Learning using the links below.
+Assistant : Hi! That's a great question. Machine Learning (ML) is a subset of artificial intelligence (AI) that enables computers to learn from data and improve their performance over time without being explicitly programmed.
 
 Example 2
 Questioner : Hi, how does animal reproduce?
