@@ -232,8 +232,7 @@ Assitant: Yes, is correct because.../ No, is wrong because..., and the correct a
 {lang_instruction}
 
 Current User Question: {user_query}
-
-Please provide a helpful response based on the context above."""
+"""
 
         try:
             print("CS Helper bot is answering...")
