@@ -101,23 +101,18 @@ User Input → Google Translate → Embedding → Semantic Search (FAQ dataset e
 
 ---
 
-## 📁 Struktur Folder (Contoh)
+## 📁 Struktur Folder
 
 ```
 EduTech-AI/
+├── best_embedding_model/
 ├── app.py
-├── .env.example
+├── bots.py
+├── data.json
+├── dataWeb.json
+├── faq.json
+├── .env
 ├── requirements.txt
-├── data/
-│   ├── faq_dataset.csv
-│   ├── embedded_dataset.pkl
-│   └── ...
-├── model/
-│   └── fine_tuned_model/
-├── utils/
-│   └── helper_functions.py
-└── assets/
-    └── ui_images/
 ```
 
 ---
