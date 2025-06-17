@@ -121,7 +121,10 @@ EduTech-AI/
 
 Website kami berfokus pada tampilan edukatif yang menampilkan kursus terkait *Computer Science* dengan bantuan chatbot interaktif. Berikut langkah-langkah menggunakan aplikasi:
 
-### 1. **Dashboard (Halaman Awal)**  
+### 1. **Dashboard (Halaman Awal)** 
+<p align="center">
+  <img src="imagess/dashboard.png" alt="Dashboard" width="300" height="533"/>
+</p>
 - Saat pengguna membuka website, akan langsung diarahkan ke halaman **Dashboard**.  
 - Di halaman ini, pengguna bisa melihat:
   - Penjelasan singkat tentang AI Chatbot yang tersedia.
