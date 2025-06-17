@@ -123,7 +123,7 @@ Website kami berfokus pada tampilan edukatif yang menampilkan kursus terkait *Co
 
 ### 1. **Dashboard (Halaman Awal)** 
 <p align="center">
-  <img src="imagess/dashboard.png" alt="Dashboard" width="300" height="533"/>
+  <img src="images/dashboard.png" alt="Dashboard" width="300" height="533"/>
 </p>
 - Saat pengguna membuka website, akan langsung diarahkan ke halaman **Dashboard**.  
 - Di halaman ini, pengguna bisa melihat:
