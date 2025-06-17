@@ -8,8 +8,8 @@ EduTech adalah chatbot edukasi interaktif berbasis AI yang bertujuan mempermudah
 
 ## Live Website & Repository
 
-🌐 [Akses Website Chatbot](https://edutech-ai-chatbot.streamlit.app)
-📂 [Repository GitHub](https://github.com/Lukas166/EduTech-AI)
+-[Akses Website Chatbot](https://edutech-ai-chatbot.streamlit.app)
+-[Repository GitHub](https://github.com/Lukas166/EduTech-AI)
 
 ---
 
