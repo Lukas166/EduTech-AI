@@ -125,6 +125,7 @@ Website kami berfokus pada tampilan edukatif yang menampilkan kursus terkait *Co
 <p align="center">
   <img src="images/dashboard.png" alt="Dashboard" width="800" height="450"/>
 </p>
+
 - Saat pengguna membuka website, akan langsung diarahkan ke halaman **Dashboard**.  
 - Di halaman ini, pengguna bisa melihat:
   - Penjelasan singkat tentang AI Chatbot yang tersedia.
@@ -135,6 +136,10 @@ Website kami berfokus pada tampilan edukatif yang menampilkan kursus terkait *Co
   - `Course List`
 
 ### 2. **AI Learning Assistant (Chatbot)**
+<p align="center">
+  <img src="images/chatbot.png" alt="Dashboard" width="800" height="450"/>
+</p>
+
 - Fitur chatbot dapat diakses melalui tab `Chatbot` di sidebar.
 - Chatbot ini bersifat **multi-language** dan mampu memberikan **respons interaktif dan kontekstual**.
 - Setelah pengguna memberikan pertanyaan (dalam berbagai bahasa), sistem akan:
@@ -143,9 +148,17 @@ Website kami berfokus pada tampilan edukatif yang menampilkan kursus terkait *Co
   - Menyertakan **rekomendasi link** ke halaman *course* yang terkait.
 
 ### 3. **Navigasi ke Course**
+<p align="center">
+  <img src="images/course_preview.png" alt="Dashboard" width="800" height="450"/>
+</p>
+
 - Jika pengguna mengklik tautan yang disarankan oleh chatbot, mereka akan diarahkan langsung ke halaman *course* yang dimaksud.
 - Hal ini membantu pembelajaran secara langsung dan mendalam sesuai konteks pertanyaan yang diajukan.
 
 ### 4. **Course List (Daftar Kursus)**
+<p align="center">
+  <img src="images/course.png" alt="Dashboard" width="800" height="450"/>
+</p>
+
 - Tab terakhir di sidebar adalah `Course List`, yang menampilkan semua materi kursus yang tersedia.
 - Pengguna dapat menjelajahi seluruh konten pembelajaran secara mandiri dan memilih topik yang mereka minati.
